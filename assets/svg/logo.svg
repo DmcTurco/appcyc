@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <!-- Círculo verde exterior -->
+  <path d="M150 40 A60 60 0 1 1 150 160 A60 60 0 1 1 150 40" 
+        fill="none" 
+        stroke="#8cc63f" 
+        stroke-width="12"/>
+  
+  <!-- Rayo azul -->
+  <path d="M160 70 L140 100 L155 100 L140 130" 
+        fill="none" 
+        stroke="#2458a5" 
+        stroke-width="12" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+  
+  <!-- Texto C&C -->
+  <text x="70" y="180" 
+        font-family="Arial Black, sans-serif" 
+        font-size="24" 
+        font-weight="bold">C&amp;C</text>
+  
+  <!-- Texto PROENERG -->
+  <text x="130" y="180" 
+        font-family="Arial, sans-serif" 
+        font-size="24" 
+        font-weight="bold">PROENERG</text>
+  
+  <!-- Texto pequeño -->
+  <text x="85" y="195" 
+        font-family="Arial, sans-serif" 
+        font-size="12">INGENIERÍA Y PROYECTOS</text>
+</svg>
