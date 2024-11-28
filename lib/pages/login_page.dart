@@ -1,11 +1,14 @@
-// lib/pages/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/api_helper.dart';
+import '../widgets/login/email_field.dart';
+import '../widgets/login/password_field.dart';
+import '../widgets/login/login_button.dart';
+import '../widgets/login/login_header.dart';
 import 'dart:convert';
 import 'home_page.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'error_connection_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,6 +23,43 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _isCheckingConnection = true;
+  bool _hasConnection = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialState();
+  }
+
+  Future<void> _checkInitialState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token != null && mounted) {
+      try {
+        final response = await http
+            .get(Uri.parse(ApiHelper.getEndpoint('login')))
+            .timeout(const Duration(seconds: 5));
+
+        if (mounted && response.statusCode == 405) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomePage()),
+          );
+        } else {
+          await prefs.remove('token');
+          setState(() => _isCheckingConnection = false);
+        }
+      } catch (e) {
+        setState(() {
+          _hasConnection = false;
+          _isCheckingConnection = false;
+        });
+      }
+    } else {
+      setState(() => _isCheckingConnection = false);
+    }
+  }
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
@@ -35,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
           'password': _passwordController.text,
         }),
       );
-      // Imprimir la respuesta para debugging
+
       print('Status code: ${response.statusCode}');
       print('Response body: ${response.body}');
 
@@ -44,12 +84,10 @@ class _LoginPageState extends State<LoginPage> {
         final token = responseData['token'];
         print('Token recibido: $token');
 
-        // Guardar el token
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
 
         if (mounted) {
-          // Navegar a HomePage en lugar de MyHomePage
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const HomePage()),
           );
@@ -83,6 +121,20 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingConnection) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (!_hasConnection) {
+      return ErrorConnectionScreen(
+        onRetry: _checkInitialState,
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(
@@ -95,134 +147,22 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 40),
-                  // Logo de la empresa
-                  // Image.asset(
-                  //   'assets/images/logo.png', // Asegúrate de tener este archivo
-                  //   height: 120,
-                  // ),
-                  SvgPicture.asset(
-                    'assets/svg/logo.svg',
-                    height: 120,
-                  ),
-                  
-                  const SizedBox(height: 40),
-                  // Título
-                  const Text(
-                    'Portal Técnico',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E4C90), // Azul corporativo
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Instalaciones de Gas Natural',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  // Campo de email
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor ingrese su email';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
+                  const LoginHeader(),
+                  EmailField(controller: _emailController),
                   const SizedBox(height: 16),
-                  // Campo de contraseña
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          labelText: 'Contraseña',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor ingrese su contraseña';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
+                  PasswordField(
+                    controller: _passwordController,
+                    obscurePassword: _obscurePassword,
+                    onTogglePassword: () {
+                      setState(() => _obscurePassword = !_obscurePassword);
+                    },
                   ),
                   const SizedBox(height: 32),
-                  // Botón de login
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1E4C90),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 3,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              'Iniciar Sesión',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ),
+                  LoginButton(
+                    onPressed: _login,
+                    isLoading: _isLoading,
                   ),
                   const SizedBox(height: 24),
-                  // Texto de ayuda
                   const Text(
                     'Contacte al administrador si tiene problemas para acceder',
                     textAlign: TextAlign.center,
