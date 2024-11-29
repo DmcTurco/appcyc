@@ -9,6 +9,7 @@ import '../widgets/login/login_header.dart';
 import 'dart:convert';
 import 'home_page.dart';
 import 'error_connection_screen.dart';
+import '../helpers/connection_helper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,36 +34,51 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _checkInitialState() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token != null && mounted) {
-      try {
-        final response = await http
-            .get(Uri.parse(ApiHelper.getEndpoint('login')))
-            .timeout(const Duration(seconds: 5));
-
-        if (mounted && response.statusCode == 405) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomePage()),
-          );
-        } else {
-          await prefs.remove('token');
-          setState(() => _isCheckingConnection = false);
-        }
-      } catch (e) {
+    if (!await ConnectionHelper.checkConnection()) {
+      if (mounted) {
         setState(() {
           _hasConnection = false;
           _isCheckingConnection = false;
         });
+        return;
       }
-    } else {
-      setState(() => _isCheckingConnection = false);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token != null && await ConnectionHelper.verifyToken(token)) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+        return;
+      }
+    }
+
+    await prefs.remove('token');
+    if (mounted) {
+      setState(() {
+        _hasConnection = true;
+        _isCheckingConnection = false;
+      });
     }
   }
 
   Future<void> _login() async {
+    
     if (!_formKey.currentState!.validate()) return;
+    if (!await ConnectionHelper.checkConnection()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sin conexión al servidor'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
 
     setState(() => _isLoading = true);
 
