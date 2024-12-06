@@ -102,6 +102,7 @@ class _LoginPageState extends State<LoginPage> {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
+        await prefs.setString('tecnico_data', json.encode(responseData)); // Agregar esta línea
 
         if (mounted) {
           Navigator.of(context).pushReplacement(

@@ -1,10 +1,9 @@
-import 'package:cyc/widgets/installation/installation_card.dart';
+import 'package:cyc/pages/installation/installation_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../helpers/api_helper.dart';
 import '../../models/installation.dart';
-
 
 class InstallationListPage extends StatefulWidget {
   const InstallationListPage({super.key});
@@ -33,8 +32,7 @@ class _InstallationListPageState extends State<InstallationListPage> {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          installations =
-              data.map((json) => Installation.fromJson(json)).toList();
+          installations =data.map((json) => Installation.fromJson(json)).toList();
           isLoading = false;
         });
       } else {
@@ -65,10 +63,49 @@ class _InstallationListPageState extends State<InstallationListPage> {
                 itemCount: installations.length,
                 itemBuilder: (context, index) {
                   final installation = installations[index];
-                  return InstallationCard(installation: installation);
+                  return Card(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: ListTile(
+                      title: Text('Solicitud #${installation.numeroSolicitud}'),
+                      trailing: _buildStatusChip(installation.estadoNombre, installation.estadoBadge),
+                      onTap: () => Navigator.push(context,MaterialPageRoute(
+                          builder: (_) => InstallationDetailPage(
+                              installation: installation),
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
     );
+  }
+
+  Widget _buildStatusChip(String status, String badge) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _getStatusColor(badge),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        status,
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
+    );
+  }
+
+  Color _getStatusColor(String badge) {
+    switch (badge) {
+      case 'bg-gradient-warning':
+        return Colors.orange;
+      case 'bg-gradient-info':
+        return Colors.blue;
+      case 'bg-gradient-danger':
+        return Colors.red;
+      default:
+        return const Color(0xFF1E4C90);
+    }
   }
 }
