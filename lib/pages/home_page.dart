@@ -1,4 +1,5 @@
 // lib/pages/home_page.dart
+import 'package:cyc/pages/installation/installation_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,7 +29,7 @@ class HomePage extends StatelessWidget {
       print('Response body logout: ${response.body}');
 
       await prefs.remove('token');
-      
+
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -103,7 +104,8 @@ class HomePage extends StatelessWidget {
                   context,
                   'Instalaciones',
                   Icons.build_outlined,
-                  () {/* TODO: Navegación */},
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InstallationListPage()),
+                    ),
                 ),
                 _buildMenuCard(
                   context,
