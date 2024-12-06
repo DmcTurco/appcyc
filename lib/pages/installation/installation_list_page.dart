@@ -32,7 +32,8 @@ class _InstallationListPageState extends State<InstallationListPage> {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          installations =data.map((json) => Installation.fromJson(json)).toList();
+          installations =
+              data.map((json) => Installation.fromJson(json)).toList();
           isLoading = false;
         });
       } else {
@@ -68,8 +69,11 @@ class _InstallationListPageState extends State<InstallationListPage> {
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: ListTile(
                       title: Text('Solicitud #${installation.numeroSolicitud}'),
-                      trailing: _buildStatusChip(installation.estadoNombre, installation.estadoBadge),
-                      onTap: () => Navigator.push(context,MaterialPageRoute(
+                      trailing: _buildStatusChip(
+                          installation.estadoNombre, installation.estadoBadge),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
                           builder: (_) => InstallationDetailPage(
                               installation: installation),
                         ),
@@ -98,12 +102,14 @@ class _InstallationListPageState extends State<InstallationListPage> {
 
   Color _getStatusColor(String badge) {
     switch (badge) {
-      case 'bg-gradient-warning':
-        return Colors.orange;
-      case 'bg-gradient-info':
+      case 'bg-gradient-primary':
         return Colors.blue;
+      case 'bg-gradient-warning':
+        return Colors.amber; // Changed to amber
       case 'bg-gradient-danger':
         return Colors.red;
+      case 'bg-gradient-info':
+        return Colors.lightBlue;
       default:
         return const Color(0xFF1E4C90);
     }
