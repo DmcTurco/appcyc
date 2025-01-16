@@ -66,7 +66,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
-    
     if (!_formKey.currentState!.validate()) return;
     if (!await ConnectionHelper.checkConnection()) {
       if (mounted) {
@@ -102,7 +101,8 @@ class _LoginPageState extends State<LoginPage> {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
-        await prefs.setString('tecnico_data', json.encode(responseData)); // Agregar esta línea
+        await prefs.setString(
+            'tecnico_data', json.encode(responseData)); // Agregar esta línea
 
         if (mounted) {
           Navigator.of(context).pushReplacement(

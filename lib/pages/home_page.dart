@@ -1,7 +1,7 @@
 // lib/pages/home_page.dart
 import 'dart:convert';
 import 'package:cyc/models/installation.dart';
-import 'package:cyc/pages/installation/installation_detail_page.dart';
+// import 'package:cyc/pages/installation/installation_detail_page.dart';
 import 'package:cyc/pages/installation/installation_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -45,73 +45,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Widget _buildRecentRequests() {
-  //   return Card(
-  //     margin: const EdgeInsets.all(16),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         const Padding(
-  //           padding: EdgeInsets.all(16),
-  //           child: Text(
-  //             'Solicitudes Recientes',
-  //             style: TextStyle(
-  //               fontSize: 18,
-  //               fontWeight: FontWeight.bold,
-  //               color: Color(0xFF1E4C90),
-  //             ),
-  //           ),
-  //         ),
-  //         ...installations.take(3).map((installation) => ListTile(
-  //           title: Text('Solicitud #${installation.numeroSolicitud}'),
-  //           subtitle: Text(installation.solicitanteNombre ?? ''),
-  //           trailing: _buildStatusChip(installation.estadoNombre, installation.estadoBadge),
-  //           onTap: () => Navigator.push(
-  //             context,
-  //             MaterialPageRoute(
-  //               builder: (_) => InstallationDetailPage(installation: installation),
-  //             ),
-  //           ),
-  //         )),
-  //         TextButton(
-  //           onPressed: () => Navigator.push(
-  //             context,
-  //             MaterialPageRoute(builder: (_) => const InstallationListPage()),
-  //           ),
-  //           child: const Text('Ver todas'),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
-  // Widget _buildStatusChip(String status, String badge) {
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-  //     decoration: BoxDecoration(
-  //       color: _getStatusColor(badge),
-  //       borderRadius: BorderRadius.circular(12),
-  //     ),
-  //     child: Text(
-  //       status,
-  //       style: const TextStyle(color: Colors.white, fontSize: 12),
-  //     ),
-  //   );
-  // }
 
-  // Color _getStatusColor(String badge) {
-  //   switch (badge) {
-  //     case 'bg-gradient-warning':
-  //       return Colors.orange;
-  //     case 'bg-gradient-info':
-  //       return Colors.blue;
-  //     case 'bg-gradient-danger':
-  //       return Colors.red;
-  //     default:
-  //       return const Color(0xFF1E4C90);
-  //   }
-  // }
- 
  
  Future<void> _loadTecnicoInfo() async {
    try {
