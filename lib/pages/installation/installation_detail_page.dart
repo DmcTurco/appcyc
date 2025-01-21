@@ -1,26 +1,42 @@
-// lib/pages/installation/installation_detail_page.dart
 import 'package:flutter/material.dart';
 import '../../models/installation.dart';
 import '../../widgets/installation/installation_card.dart';
 
 class InstallationDetailPage extends StatelessWidget {
- final Installation installation;
+  final Installation installation;
  
- const InstallationDetailPage({super.key, required this.installation});
+  const InstallationDetailPage({super.key, required this.installation});
 
- @override 
- Widget build(BuildContext context) {
-   return Scaffold(
-     appBar: AppBar(
-       title: Text('Solicitud #${installation.numeroSolicitud}'),
-       backgroundColor: Colors.white,
-     ),
-     body: SingleChildScrollView(
-       child: Padding(
-         padding: const EdgeInsets.all(8.0),
-         child: InstallationCard(installation: installation),
-       ),
-     ),
-   );
- }
+  @override 
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: Text(
+          'Solicitud #${installation.numeroSolicitud}',
+          style: const TextStyle(
+            color: Color(0xFF1E4C90),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              // Implementar compartir
+            },
+            color: const Color(0xFF1E4C90),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: InstallationCard(installation: installation),
+        ),
+      ),
+    );
+  }
 }
