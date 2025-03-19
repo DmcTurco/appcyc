@@ -31,7 +31,7 @@ class Installation {
       numeroSolicitud: json['numero_solicitud'],
       numeroSuministro: json['numero_suministro'],
       numeroContratoSuministro: json['numero_contrato_suministro'],
-      fechaAprobacionContrato: json['fecha_aprobacion_contrato'] != null ? DateTime.parse(json['fecha_aprobacion_contrato']) : null,
+      fechaAprobacionContrato: json['fecha_asignacion'] != null ? DateTime.parse(json['fecha_asignacion']) : null,
       estadoNombre: json['estado_nombre'],
       estadoBadge: json['estado_badge'],
       solicitanteNombre: json['solicitante_nombre'],

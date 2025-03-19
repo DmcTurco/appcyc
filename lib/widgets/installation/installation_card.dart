@@ -267,37 +267,37 @@ class InstallationCard extends StatelessWidget {
 
   Widget _buildMap(BuildContext context) {
     return Container(
-      height: 200,
+      // height: 200,
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
+      // decoration: BoxDecoration(
+      //   color: Colors.grey[200],
+      //   borderRadius: BorderRadius.circular(12),
+      // ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            Center(
-              child: Icon(
-                Icons.map,
-                size: 48,
-                color: Colors.grey[400],
-              ),
-            ),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: FloatingActionButton.small(
-                onPressed: () => _openMaps(
-                  context,
-                  installation.ubicacion!,
-                ),
-                backgroundColor: const Color(0xFF1E4C90),
-                child: const Icon(Icons.directions),
-              ),
-            ),
-          ],
-        ),
+        // child: Stack(
+        //   children: [
+        //     Center(
+        //       child: Icon(
+        //         Icons.map,
+        //         size: 48,
+        //         color: Colors.grey[400],
+        //       ),
+        //     ),
+        //     Positioned(
+        //       bottom: 16,
+        //       right: 16,
+        //       child: FloatingActionButton.small(
+        //         onPressed: () => _openMaps(
+        //           context,
+        //           installation.ubicacion!,
+        //         ),
+        //         backgroundColor: const Color(0xFF1E4C90),
+        //         child: const Icon(Icons.directions),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ),
     );
   }

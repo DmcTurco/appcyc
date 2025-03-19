@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiHelper {
   static String getBaseUrl() {
     final url = Platform.isAndroid
-        ? 'http://192.168.18.4:8000/api'
+        ? 'http://192.168.100.2:8000/api'
         : 'http://localhost:8000/api';
     print('Using API URL: $url'); // Para verificar qué URL se está usando
     return url;

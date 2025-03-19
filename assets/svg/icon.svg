@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Fondo blanco circular -->
+  <circle cx="512" cy="512" r="512" fill="white"/>
+  
+  <!-- Círculo verde exterior - Mucho más grande -->
+  <path d="M512 156 A356 356 0 1 1 512 868 A356 356 0 1 1 512 156" 
+        fill="none" 
+        stroke="#8cc63f" 
+        stroke-width="72"/>
+  
+  <!-- Rayo azul - Escalado proporcionalmente -->
+  <path d="M562 306 L462 512 L522 512 L462 718" 
+        fill="none" 
+        stroke="#2458a5" 
+        stroke-width="72" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+  
+  <!-- Texto CyC - Más grande y reposicionado -->
+  <text x="256" y="950" 
+        font-family="Arial Black, sans-serif" 
+        font-size="120" 
+        font-weight="bold"
+        fill="#333">CyC</text>
+  
+  <!-- Texto PROENERG - Más grande y reposicionado -->
+  <text x="512" y="950" 
+        font-family="Arial, sans-serif" 
+        font-size="120" 
+        font-weight="bold"
+        fill="#333">PROENERG</text>
+</svg>

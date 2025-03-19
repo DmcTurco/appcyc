@@ -92,6 +92,7 @@ class _InstallationListPageState extends State<InstallationListPage> {
     );
   }
 
+  //Una barra de navegación (_buildAppBar())
   AppBar _buildAppBar() {
     return AppBar(
       title: const Text(
@@ -154,6 +155,7 @@ class _InstallationListPageState extends State<InstallationListPage> {
     );
   }
 
+  //Una barra de búsqueda (_buildSearchBar())
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -185,28 +187,53 @@ class _InstallationListPageState extends State<InstallationListPage> {
     );
   }
 
+  //Una lista de instalaciones (_buildInstallationsList())
   Widget _buildInstallationsList() {
     if (filteredInstallations.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.engineering_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              searchQuery.isEmpty
-                  ? 'No hay instalaciones disponibles'
-                  : 'No se encontraron resultados',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
+      return RefreshIndicator(
+        onRefresh: _loadInstallations,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height - 200,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.engineering_outlined,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    searchQuery.isEmpty
+                        ? 'No hay instalaciones disponibles'
+                        : 'No se encontraron resultados',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _loadInstallations,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Actualizar'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xFF1E4C90),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       );
     }
@@ -223,7 +250,46 @@ class _InstallationListPageState extends State<InstallationListPage> {
       ),
     );
   }
+  // Widget _buildInstallationsList() {
+  //   if (filteredInstallations.isEmpty) {
+  //     return Center(
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           Icon(
+  //             Icons.engineering_outlined,
+  //             size: 64,
+  //             color: Colors.grey[400],
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Text(
+  //             searchQuery.isEmpty
+  //                 ? 'No hay instalaciones disponibles'
+  //                 : 'No se encontraron resultados',
+  //             style: TextStyle(
+  //               color: Colors.grey[600],
+  //               fontSize: 16,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     );
+  //   }
 
+  //   return RefreshIndicator(
+  //     onRefresh: _loadInstallations,
+  //     child: ListView.builder(
+  //       padding: const EdgeInsets.all(8),
+  //       itemCount: filteredInstallations.length,
+  //       itemBuilder: (context, index) {
+  //         final installation = filteredInstallations[index];
+  //         return _buildInstallationCard(installation);
+  //       },
+  //     ),
+  //   );
+  // }
+
+  //Tarjetas para cada instalación (_buildInstallationCard())
   Widget _buildInstallationCard(Installation installation) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
@@ -322,7 +388,7 @@ class _InstallationListPageState extends State<InstallationListPage> {
 
   Widget _buildLocationInfo(Installation installation) {
     return InkWell(
-      onTap: () => _showLocationDetails(installation),
+      // onTap: () => _showLocationDetails(installation),
       child: Row(
         children: [
           Icon(
@@ -355,11 +421,11 @@ class _InstallationListPageState extends State<InstallationListPage> {
               ],
             ),
           ),
-          Icon(
-            Icons.arrow_forward_ios,
-            size: 12,
-            color: Colors.grey[400],
-          ),
+          // Icon(
+          //   Icons.arrow_forward_ios,
+          //   size: 12,
+          //   color: Colors.grey[400],
+          // ),
         ],
       ),
     );
@@ -392,70 +458,70 @@ class _InstallationListPageState extends State<InstallationListPage> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  void _showLocationDetails(Installation installation) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Detalles de Ubicación'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (installation.direccion != null) ...[
-              const Text(
-                'Dirección:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(installation.direccion!),
-              const SizedBox(height: 12),
-            ],
-            const Text(
-              'Distrito:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text(installation.distrito),
-            if (installation.ubicacion != null) ...[
-              const SizedBox(height: 12),
-              const Text(
-                'Ubicación:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(installation.ubicacion!),
-            ],
-            const SizedBox(height: 16),
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Icon(Icons.map, size: 48, color: Colors.grey),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          if (installation.ubicacion != null)
-            TextButton(
-              onPressed: () {
-                // Aquí podrías implementar la apertura en Google Maps
-                // usando el valor de installation.ubicacion
-                Navigator.of(context).pop();
-              },
-              child: const Text('Abrir en Maps'),
-            ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _showLocationDetails(Installation installation) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Detalles de Ubicación'),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           if (installation.direccion != null) ...[
+  //             const Text(
+  //               'Dirección:',
+  //               style: TextStyle(fontWeight: FontWeight.bold),
+  //             ),
+  //             const SizedBox(height: 4),
+  //             Text(installation.direccion!),
+  //             const SizedBox(height: 12),
+  //           ],
+  //           const Text(
+  //             'Distrito:',
+  //             style: TextStyle(fontWeight: FontWeight.bold),
+  //           ),
+  //           const SizedBox(height: 4),
+  //           Text(installation.distrito),
+  //           if (installation.ubicacion != null) ...[
+  //             const SizedBox(height: 12),
+  //             const Text(
+  //               'Ubicación:',
+  //               style: TextStyle(fontWeight: FontWeight.bold),
+  //             ),
+  //             const SizedBox(height: 4),
+  //             Text(installation.ubicacion!),
+  //           ],
+  //           const SizedBox(height: 16),
+  //           Container(
+  //             height: 200,
+  //             decoration: BoxDecoration(
+  //               color: Colors.grey[200],
+  //               borderRadius: BorderRadius.circular(8),
+  //             ),
+  //             child: const Center(
+  //               child: Icon(Icons.map, size: 48, color: Colors.grey),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         if (installation.ubicacion != null)
+  //           TextButton(
+  //             onPressed: () {
+  //               // Aquí podrías implementar la apertura en Google Maps
+  //               // usando el valor de installation.ubicacion
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('Abrir en Maps'),
+  //           ),
+  //         TextButton(
+  //           onPressed: () => Navigator.of(context).pop(),
+  //           child: const Text('Cerrar'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildStatusChip(String status, String badge) {
     return Container(
