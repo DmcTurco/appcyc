@@ -34,7 +34,7 @@ class _InstallationListPageState extends State<InstallationListPage> {
     setState(() => isLoading = true);
     try {
       final response = await http.get(
-        Uri.parse(ApiHelper.getEndpoint('solicitudes')),
+        Uri.parse(await ApiHelper.getEndpoint('solicitudes')),
         headers: await ApiHelper.getAuthHeaders(),
       );
 
@@ -250,44 +250,6 @@ class _InstallationListPageState extends State<InstallationListPage> {
       ),
     );
   }
-  // Widget _buildInstallationsList() {
-  //   if (filteredInstallations.isEmpty) {
-  //     return Center(
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           Icon(
-  //             Icons.engineering_outlined,
-  //             size: 64,
-  //             color: Colors.grey[400],
-  //           ),
-  //           const SizedBox(height: 16),
-  //           Text(
-  //             searchQuery.isEmpty
-  //                 ? 'No hay instalaciones disponibles'
-  //                 : 'No se encontraron resultados',
-  //             style: TextStyle(
-  //               color: Colors.grey[600],
-  //               fontSize: 16,
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     );
-  //   }
-
-  //   return RefreshIndicator(
-  //     onRefresh: _loadInstallations,
-  //     child: ListView.builder(
-  //       padding: const EdgeInsets.all(8),
-  //       itemCount: filteredInstallations.length,
-  //       itemBuilder: (context, index) {
-  //         final installation = filteredInstallations[index];
-  //         return _buildInstallationCard(installation);
-  //       },
-  //     ),
-  //   );
-  // }
 
   //Tarjetas para cada instalación (_buildInstallationCard())
   Widget _buildInstallationCard(Installation installation) {
@@ -297,7 +259,7 @@ class _InstallationListPageState extends State<InstallationListPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.grey.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -319,7 +281,7 @@ class _InstallationListPageState extends State<InstallationListPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E4C90).withOpacity(0.1),
+                      color: const Color(0xFF1E4C90).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -527,10 +489,10 @@ class _InstallationListPageState extends State<InstallationListPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _getStatusColor(badge).withOpacity(0.1),
+        color: _getStatusColor(badge).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getStatusColor(badge).withOpacity(0.5),
+          color: _getStatusColor(badge).withValues(alpha: 0.5),
           width: 1,
         ),
       ),

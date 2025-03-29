@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadInstallations() async {
     try {
       final response = await http.get(
-        Uri.parse(ApiHelper.getEndpoint('solicitudes')),
+        Uri.parse(await ApiHelper.getEndpoint('solicitudes')),
         headers: await ApiHelper.getAuthHeaders(),
       );
 
@@ -465,9 +465,16 @@ class _HomePageState extends State<HomePage> {
       }
 
       final response = await http.post(
-        Uri.parse(ApiHelper.getEndpoint('logout')),
+        Uri.parse(await ApiHelper.getEndpoint('logout')),
         headers: ApiHelper.getHeaders(token: token),
       );
+
+      // Verificar el código de estado de la respuesta
+      if (response.statusCode != 200) {
+        print(
+            'Error al cerrar sesión: ${response.statusCode} - ${response.body}');
+        throw Exception('Error al cerrar sesión');
+      }
 
       await prefs.remove('token');
 

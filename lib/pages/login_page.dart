@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse(ApiHelper.getEndpoint('login')),
+        Uri.parse(await ApiHelper.getEndpoint('login')),
         headers: ApiHelper.getHeaders(),
         body: json.encode({
           'email': _emailController.text,
