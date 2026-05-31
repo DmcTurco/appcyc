@@ -1,11 +1,29 @@
+import 'dart:convert';
+import 'dart:math';
+import 'package:cyc/helpers/api_helper.dart';
 import 'package:cyc/models/installation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
-class InstallationCard extends StatelessWidget {
+class InstallationCard extends StatefulWidget {
   final Installation installation;
+  final Function? onStatusChanged; // Opcional: Callback para notificar cambios
 
-  const InstallationCard({super.key, required this.installation});
+  const InstallationCard({
+    super.key,
+    required this.installation,
+    this.onStatusChanged,
+  });
+
+  @override
+  State<InstallationCard> createState() => _InstallationCardState();
+}
+
+class _InstallationCardState extends State<InstallationCard> {
+  bool _isLoading = false;
+
+  Installation get installation => widget.installation;
 
   Color _getStatusColor(String badge) {
     switch (badge) {
@@ -32,6 +50,47 @@ class InstallationCard extends StatelessWidget {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+// Método de debug para verificar la conexión con la API
+  Future<void> _debugApiConnection(BuildContext context) async {
+    try {
+      // Obtener la URL y headers
+      final url = await ApiHelper.getEndpoint('solicitudes/estado');
+      final headers = await ApiHelper.getAuthHeaders();
+
+      // Mostrar información de conexión
+      print('URL: $url');
+      print('Headers: $headers');
+
+      // Intentar una petición GET para verificar si hay problemas de conexión
+      try {
+        final testResponse = await http.get(
+          Uri.parse(await ApiHelper.getEndpoint('solicitudes')),
+          headers: headers,
+        );
+        print('Test GET respuesta: ${testResponse.statusCode}');
+        print(
+            'Test GET cuerpo: ${testResponse.body.substring(0, min(200, testResponse.body.length))}');
+      } catch (e) {
+        print('Error en petición GET: $e');
+      }
+
+      // Intentar una petición PUT vacía para ver si hay problemas con ese método
+      try {
+        final testPutResponse = await http.put(
+          Uri.parse(url),
+          headers: {...headers, 'Content-Type': 'application/json'},
+          body: json.encode({'test': true}),
+        );
+        print('Test PUT respuesta: ${testPutResponse.statusCode}');
+        print('Test PUT cuerpo: ${testPutResponse.body}');
+      } catch (e) {
+        print('Error en petición PUT: $e');
+      }
+    } catch (e) {
+      print('Error de debug: $e');
     }
   }
 
@@ -75,6 +134,24 @@ class InstallationCard extends StatelessWidget {
               Colors.red,
               () => _updateStatus(context, 'cancel'),
             ),
+            // Botón para debug - temporal
+            const Divider(),
+            ListTile(
+              leading:
+                  const Icon(Icons.bug_report, color: Colors.purple, size: 28),
+              title: const Text('Verificar API (Debug)'),
+              onTap: () {
+                Navigator.pop(context);
+                _debugApiConnection(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                        'Revisando conexión con API, ver consola para detalles'),
+                    backgroundColor: Colors.purple,
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -91,8 +168,10 @@ class InstallationCard extends StatelessWidget {
   }
 
   void _updateStatus(BuildContext context, String action) {
-    // Aquí implementarías la lógica para actualizar el estado
-    Navigator.pop(context); // Cierra el modal
+    // Cerramos el modal primero
+    Navigator.pop(context);
+
+    // Mostramos el diálogo de confirmación
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -105,21 +184,123 @@ class InstallationCard extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              // Aquí implementarías la llamada a la API
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content:
-                      Text('Estado actualizado: ${_getActionText(action)}'),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              Navigator.pop(context); // Cerrar el diálogo
+              _sendStatusUpdate(context, action); // Llamar a la API
             },
             child: const Text('Confirmar'),
           ),
         ],
       ),
     );
+  }
+
+// Método para enviar la actualización de estado a la API
+// Método para enviar la actualización de estado a la API
+  Future<void> _sendStatusUpdate(BuildContext context, String action) async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Convertir la acción en estado_id y estado_nombre
+      final Map<String, dynamic> estadoInfo = _getEstadoInfo(action);
+
+      // Crear el cuerpo de la solicitud según la estructura esperada por el backend
+      final Map<String, dynamic> requestBody = {
+        'solicitud_id': installation.id,
+        'estado_id': estadoInfo['estado_id'],
+        'estado_nombre': estadoInfo['estado_nombre'],
+      };
+
+      print('Enviando: $requestBody');
+
+      // Realizar la petición PUT a la API (cambiado de POST a PUT)
+      final response = await http.put(
+        Uri.parse(await ApiHelper.getEndpoint('solicitudes/estado')),
+        headers: {
+          ...await ApiHelper.getAuthHeaders(),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(requestBody),
+      );
+
+      // Imprimir para depuración
+      print('Respuesta: ${response.statusCode}');
+      print('Cuerpo: ${response.body}');
+
+      // Manejar la respuesta
+      if (response.statusCode == 200) {
+        // Éxito
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Estado actualizado a: ${estadoInfo['estado_nombre']}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Notificar que el estado ha cambiado
+        if (widget.onStatusChanged != null) {
+          widget.onStatusChanged!();
+        }
+      } else {
+        // Error en la respuesta
+        String errorMessage;
+        try {
+          final errorData = json.decode(response.body);
+          errorMessage = errorData['error'] ?? 'Error al actualizar el estado';
+        } catch (e) {
+          errorMessage = 'Error ${response.statusCode}';
+        }
+
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $errorMessage'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Error en la petición
+      print('Excepción: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error de conexión: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+// Método para convertir una acción en estado_id y estado_nombre
+  Map<String, dynamic> _getEstadoInfo(String action) {
+    switch (action) {
+      case 'start':
+        return {
+          'estado_id': 3, // "Iniciado"
+          'estado_nombre': 'Iniciado'
+        };
+      case 'finish':
+        return {
+          'estado_id': 4, // "finalizado"
+          'estado_nombre': 'Finalizado'
+        };
+      case 'cancel':
+        return {
+          'estado_id': 6, // "cancelado"
+          'estado_nombre': 'Cancelado'
+        };
+      default:
+        return {
+          'estado_id': 3, // Por defecto "Iniciado"
+          'estado_nombre': 'Iniciado'
+        };
+    }
   }
 
   String _getActionText(String action) {
@@ -137,31 +318,46 @@ class InstallationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.grey.withOpacity(0.2),
-          width: 1,
+    return Stack(
+      children: [
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: Colors.grey.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              _buildHeader(),
+              _buildBody(),
+              if (installation.ubicacion != null) _buildMap(context),
+              _buildActions(context),
+            ],
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          _buildHeader(),
-          _buildBody(),
-          if (installation.ubicacion != null) _buildMap(context),
-          _buildActions(context),
-        ],
-      ),
+        // Overlay de carga cuando se está haciendo la petición
+        if (_isLoading)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
+  // El resto de los métodos (buildHeader, buildBody, etc.) quedan igual que en tu código original
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E4C90).withOpacity(0.05),
+        color: const Color(0xFF1E4C90).withValues(alpha: 0.05),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Column(
@@ -267,37 +463,10 @@ class InstallationCard extends StatelessWidget {
 
   Widget _buildMap(BuildContext context) {
     return Container(
-      // height: 200,
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      // decoration: BoxDecoration(
-      //   color: Colors.grey[200],
-      //   borderRadius: BorderRadius.circular(12),
-      // ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        // child: Stack(
-        //   children: [
-        //     Center(
-        //       child: Icon(
-        //         Icons.map,
-        //         size: 48,
-        //         color: Colors.grey[400],
-        //       ),
-        //     ),
-        //     Positioned(
-        //       bottom: 16,
-        //       right: 16,
-        //       child: FloatingActionButton.small(
-        //         onPressed: () => _openMaps(
-        //           context,
-        //           installation.ubicacion!,
-        //         ),
-        //         backgroundColor: const Color(0xFF1E4C90),
-        //         child: const Icon(Icons.directions),
-        //       ),
-        //     ),
-        //   ],
-        // ),
+        // Aquí iría la implementación del mapa
       ),
     );
   }

@@ -6,7 +6,7 @@ void main() async {
   // Inicializa Flutter antes de ejecutar código asíncrono
   WidgetsFlutterBinding.ensureInitialized();
     // Configura la aplicación para usar la URL de producción
-  await ApiHelper.setProductionMode(true);
+  await ApiHelper.setProductionMode(false);
     // Opcional: imprime la URL para verificar
   print('API URL: ${await ApiHelper.getBaseUrl()}');
   
